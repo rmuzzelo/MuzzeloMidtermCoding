@@ -2,6 +2,8 @@ package com.cisc181.core;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * comment
@@ -84,13 +86,37 @@ public abstract class Person {
 	 */
 
 	public Person(String FirstName, String MiddleName, String LastName,
-			Date DOB, String Address, String Phone_number, String Email) {
+			Date DOB, String Address, String Phone_number, String Email) throws PersonException  {
 		this.FirstName = FirstName;
 		this.MiddleName = MiddleName;
 		this.LastName = LastName;
-		this.DOB = DOB;
+		//Creates a calendar instance of current date and date of birth
+		Calendar currentdate = Calendar.getInstance();
+		Calendar birthDate = Calendar.getInstance();
+		birthDate.setTime(DOB);
+		//Checks to see if DOB is more than 100 years old and if it is throws custom exception
+		int spread = currentdate.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+		if (spread < 100){
+			this.DOB = DOB;
+		}
+		else {
+			throw new PersonException(this);
+		}
+		
 		this.address = Address;
-		this.phone_number = Phone_number;
+		
+		//Checks to see if phone number is in the right format and if it isn't throws custom exception
+		String regex = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(Phone_number);
+		if (matcher.matches()) {
+			Phone_number = matcher.replaceFirst("($1) $2-$3");
+			this.phone_number = Phone_number;
+		}
+		else {
+			throw new PersonException(this);
+		}
+		
 		this.email_address = Email;
 		
 	}
